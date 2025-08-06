@@ -9,4 +9,6 @@ const getDataUri = (file) => {
   return parser.format(extName, file.buffer).content;
 };
 
-export default getDataUri
+export default getDataUri;
+
+

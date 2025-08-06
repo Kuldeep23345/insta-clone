@@ -22,7 +22,7 @@ export const register = async (req, res) => {
     });
     res
       .status(200)
-      .json({ message: "Account created successfully", success: true });
+      .json({ message: "Account created successfully", success: true ,user });
   } catch (error) {
     console.log("login error", error);
     res.status(500).json({ message: "Internal login failed", success: false });
@@ -64,7 +64,8 @@ export const login = async (req, res) => {
     });
     return res.json({
       message: `Welcome back ${user.username}`,
-      success: true,
+      success: true
+      ,user
     });
   } catch (error) {
     console.log("Login error", error);
@@ -76,7 +77,7 @@ export const logout = async function (req, res) {
   try {
     return res
       .cookie("token", "", { maxAge: 0 })
-      .json({ message: "logout successfully", success: true });
+      .json({ message: "logout successfully", success: true  });
   } catch (error) {
     console.log("logout error", error);
     res.status(400).json({ message: "logout internval error" });
@@ -106,7 +107,7 @@ export const editProfile = async (req, res) => {
       const fileUri = getDataUri(profilePicture);
       cloudResponse = await cloudinary.uploader.upload(fileUri);
     }
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('-password');
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -115,12 +116,12 @@ export const editProfile = async (req, res) => {
     if (gender) user.gender = gender;
     if (profilePicture) user.profilePicture = cloudResponse.secure_url;
     await user.save();
-    return res.status(200).json({ message: "Profile updated", success: true });
+    return res.status(200).json({ message: "Profile updated", success: true ,user });
   } catch (error) {
     console.log("Error from edit Profile", error);
     return res
       .status(500)
-      .json({ message: "Internal error from edit profile", users: User });
+      .json({ message: "Internal error from edit profile", });
   }
 };
 //get suggesed users
@@ -143,57 +144,44 @@ export const getSuggestedUsers = async (req, res) => {
   }
 };
 // follow or un follow
-export const followOrUnFollow = async (req, res) => {
-  try {
-    const followKarneWala = req.id;
-    const jiskoFollowKarunga = req.params.id;
-    if (followKarneWala == jiskoFollowKarunga) {
-      return res
-        .status(400)
-        .json({ message: "You can't follow/unfollow yourself" });
-    }
-    const user = await User.findById(followKarneWala);
-    const targetUser = await User.findById(jiskoFollowKarunga);
+export const followOrUnfollow = async (req, res) => {
+    try {
+        const followKrneWala = req.id; // patel
+        const jiskoFollowKrunga = req.params.id; // shivani
+        if (followKrneWala === jiskoFollowKrunga) {
+            return res.status(400).json({
+                message: 'You cannot follow/unfollow yourself',
+                success: false
+            });
+        }
 
-    if (!user || !targetUser) {
-      return res.status(400).json({ message: "User not found" });
-    }
+        const user = await User.findById(followKrneWala);
+        const targetUser = await User.findById(jiskoFollowKrunga);
 
-    // now check that follow or unfollow
-    const isFollowing = user.following.includes(jiskoFollowKarunga);
-    if (isFollowing) {
-      await Promise.all([
-        user.updateOne(
-          { _id: followKarneWala },
-          { $pull: { following: jiskoFollowKarunga } }
-        ),
-        user.updateOne(
-          { _id: jiskoFollowKarunga },
-          { $pull: { followers: followKarneWala } }
-        ),
-      ]);
-      return res
-        .status(200)
-        .json({ message: "unfollow successfully", success: true });
-    } else {
-      await Promise.all([
-        user.updateOne(
-          { _id: followKarneWala },
-          { $push: { following: jiskoFollowKarunga } }
-        ),
-        user.updateOne(
-          { _id: jiskoFollowKarunga },
-          { $push: { followers: followKarneWala } }
-        ),
-      ]);
-      return res
-        .status(200)
-        .json({ message: "followed successfully", success: true });
+        if (!user || !targetUser) {
+            return res.status(400).json({
+                message: 'User not found',
+                success: false
+            });
+        }
+        // mai check krunga ki follow krna hai ya unfollow
+        const isFollowing = user.following.includes(jiskoFollowKrunga);
+        if (isFollowing) {
+            // unfollow logic ayega
+            await Promise.all([
+                User.updateOne({ _id: followKrneWala }, { $pull: { following: jiskoFollowKrunga } }),
+                User.updateOne({ _id: jiskoFollowKrunga }, { $pull: { followers: followKrneWala } }),
+            ])
+            return res.status(200).json({ message: 'Unfollowed successfully', success: true });
+        } else {
+            // follow logic ayega
+            await Promise.all([
+                User.updateOne({ _id: followKrneWala }, { $push: { following: jiskoFollowKrunga } }),
+                User.updateOne({ _id: jiskoFollowKrunga }, { $push: { followers: followKrneWala } }),
+            ])
+            return res.status(200).json({ message: 'followed successfully', success: true });
+        }
+    } catch (error) {
+        console.log(error);
     }
-  } catch (error) {
-    console.log("error from follow or un follow");
-    return res
-      .status(500)
-      .json({ message: "Internal error in follow or un follow" });
-  }
-};
+}
