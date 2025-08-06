@@ -12,7 +12,7 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(cookieParser());
 // routes
 import userRoutes from "./routes/user.route.js";
-app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/user", userRoutes);
 
 // app listening
 const PORT = process.env.PORT || 3000;
