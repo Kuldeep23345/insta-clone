@@ -43,7 +43,7 @@ export const login = async (req, res) => {
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Incorrect email or password" });
     }
-    user = {
+   user = {
       _id: user._id,
       username: user.username,
       email: user.email,
@@ -60,9 +60,9 @@ export const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 1*24 * 60 * 60 * 1000,
     });
-    return res.json({
+    return res.status(200).json({
       message: `Welcome back ${user.username}`,
       success: true
       ,user
@@ -76,7 +76,7 @@ export const login = async (req, res) => {
 export const logout = async function (req, res) {
   try {
     return res
-      .cookie("token", "", { maxAge: 0 })
+      .cookie("token", "").status(200)
       .json({ message: "logout successfully", success: true  });
   } catch (error) {
     console.log("logout error", error);

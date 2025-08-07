@@ -6,7 +6,7 @@ const router = express.Router()
 
 router.route("/register").post(register)
 router.route("/login").post(login)
-router.route("/logout").get(logout)
+router.route("/logout").post(logout)
 router.route("/:id/profile").get(isAuth,getProfile)
 router.route("/profile/edit").post(isAuth,upload.single("profilePicture"),editProfile)
 router.route("/suggested").get(isAuth,getSuggestedUsers)
@@ -14,5 +14,5 @@ router.route("/followorunfollow/:id").post(isAuth,followOrUnfollow)
 
 
 
-router.route("/logout").post(logout)
+
 export default router
