@@ -29,7 +29,7 @@ export const addNewPost = async (req,res) => {
             message:"New post added",
             post,
             success:true,
-
+  
         })
     } catch (error) {
         console.log(error);
